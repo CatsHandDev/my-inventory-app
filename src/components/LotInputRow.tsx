@@ -41,7 +41,7 @@ const LotInputRow = ({ lots, onChange }: Props) => {
             <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {/* 入数 */}
-                <Typography variant="h5" sx={{ minWidth: '10px', mr: 1 }}>入数:</Typography>
+                <Typography variant="h5" sx={{ minWidth: '10px', whiteSpace: 'nowrap' }}>入数:</Typography>
                 <TextField
                   type="number" size="small" value={lot.quantityPerLot}
                   onChange={(e) => handleUpdate(lot.id, 'quantityPerLot', parseInt(e.target.value, 10))}
@@ -60,7 +60,7 @@ const LotInputRow = ({ lots, onChange }: Props) => {
             <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
               {/* ロット数 */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Typography variant="h5" sx={{ minWidth: '40px', mr: 1 }}>個数:</Typography>
+                <Typography variant="h5" sx={{ minWidth: '40px', whiteSpace: 'nowrap' }}>個数:</Typography>
                 <TextField
                   type="number" size="small" value={lot.lotCount}
                   onChange={(e) => handleUpdate(lot.id, 'lotCount', parseInt(e.target.value, 10))}
