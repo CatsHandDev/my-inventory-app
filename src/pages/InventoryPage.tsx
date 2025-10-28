@@ -7,7 +7,7 @@ import InventoryFooter from '../components/InventoryFooter';
 import ProductSelectionModal from '../components/ProductSelectionModal';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
-  Box, Container, Divider, List, ListItemText, Paper, type SelectChangeEvent, IconButton, Typography,
+  Box, Container, Divider, List, Paper, type SelectChangeEvent, IconButton, Typography,
 } from '@mui/material';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import { useLocalStorage } from '../hooks/useLocalStorage';
