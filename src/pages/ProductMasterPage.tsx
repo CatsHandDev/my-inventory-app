@@ -7,6 +7,7 @@ import {
   Box, Button, Container, Paper, Stack, TextField, Typography, List, ListItem, ListItemText, IconButton, Divider, Autocomplete
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ConfirmationDialog from '../components/ConfirmationDialog';
 
 // ★★★ 3. インポートするデータの行の型を定義 ★★★
 interface CsvRow {
@@ -26,6 +27,12 @@ const ProductMasterPage = () => {
   const [newProductName, setNewProductName] = useState('');
   const [newJanCode, setNewJanCode] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [dialogState, setDialogState] = useState({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
   const existingCategories = useMemo(() => [...new Set(products.map(p => p.category))], [products]);
 
@@ -49,10 +56,20 @@ const ProductMasterPage = () => {
     setNewJanCode('');
   };
 
-  const handleDeleteProduct = (id: number) => {
-    if (window.confirm('この商品を削除しますか？')) {
-      setProducts(products.filter(p => p.id !== id));
-    }
+  const handleDeleteProduct = (productToDelete: Product) => {
+    setDialogState({
+      open: true,
+      title: '商品の削除',
+      message: `「${productToDelete.name}」を削除します。\nよろしいですか？`,
+      onConfirm: () => {
+        setProducts(products.filter(p => p.id !== productToDelete.id));
+        handleCloseDialog();
+      }
+    });
+  };
+
+  const handleCloseDialog = () => {
+    setDialogState({ ...dialogState, open: false });
   };
 
   const filteredProducts = useMemo(() => {
@@ -142,7 +159,7 @@ const ProductMasterPage = () => {
               <React.Fragment key={product.id}>
                 <ListItem
                   secondaryAction={
-                    <IconButton edge="end" onClick={() => handleDeleteProduct(product.id)}>
+                    <IconButton edge="end" onClick={() => handleDeleteProduct(product)}>
                       <DeleteIcon />
                     </IconButton>
                   }
@@ -168,6 +185,14 @@ const ProductMasterPage = () => {
           </Stack>
         </Paper>
       </Container>
+
+      <ConfirmationDialog
+        open={dialogState.open}
+        onClose={handleCloseDialog}
+        onConfirm={dialogState.onConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+      />
     </Box>
   );
 };

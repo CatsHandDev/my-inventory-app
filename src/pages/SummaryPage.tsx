@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { InventoryItem, HistoryRecord } from '../types/inventory';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -14,6 +14,8 @@ import {
   Divider,
   Stack,
 } from '@mui/material';
+import ConfirmationDialog from '../components/ConfirmationDialog';
+import { useSnackbar } from '../hooks/useSnackbar';
 
 const SummaryPage = () => {
   const navigate = useNavigate();
@@ -24,6 +26,14 @@ const SummaryPage = () => {
     staffName: string;
   };
   const [history, setHistory] = useLocalStorage<HistoryRecord[]>('inventory-history', []);
+  const [dialogState, setDialogState] = useState({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+
+  const { showSnackbar } = useSnackbar();
 
   const handleSave = () => {
     const newRecord: HistoryRecord = {
@@ -38,21 +48,37 @@ const SummaryPage = () => {
     };
     setHistory([newRecord, ...history]);
     localStorage.removeItem('inventory-in-progress');
-    alert('保存しました。');
+    showSnackbar('保存しました。');
     navigate('/');
   };
 
   const handleNew = () => {
-    if (window.confirm('現在の入力内容は破棄されます。新しい入力を開始しますか？')) {
-      localStorage.removeItem('inventory-in-progress');
-      navigate('/new');
-    }
+    setDialogState({
+      open: true,
+      title: '新規作成の確認',
+      message: '現在の入力内容は破棄されます。\n新しい入力を開始しますか？',
+      onConfirm: () => {
+        localStorage.removeItem('inventory-in-progress');
+        navigate('/new');
+        handleCloseDialog();
+      }
+    });
   };
 
   const handleGoHome = () => {
-    if (window.confirm('ホームに戻りますか？\n（入力ページに戻れば作業を再開できます）')) {
-      navigate('/');
-    }
+    setDialogState({
+      open: true,
+      title: 'ホームに戻る',
+      message: 'ホームに戻りますか？\n（入力ページに戻れば作業を再開できます）',
+      onConfirm: () => {
+        navigate('/');
+        handleCloseDialog();
+      }
+    });
+  };
+
+  const handleCloseDialog = () => {
+    setDialogState({ ...dialogState, open: false });
   };
 
   return (
@@ -118,6 +144,14 @@ const SummaryPage = () => {
           </Stack>
         </Box>
       </Container>
+
+      <ConfirmationDialog
+        open={dialogState.open}
+        onClose={handleCloseDialog}
+        onConfirm={dialogState.onConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+      />
     </Box>
   );
 };

@@ -12,6 +12,7 @@ import {
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import LotInputRow from '../components/LotInputRow';
+import ConfirmationDialog from '../components/ConfirmationDialog';
 
 // (サンプルデータ定義は変更ありません)
 
@@ -44,6 +45,12 @@ const InventoryPage = () => {
   });
 
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [dialogState, setDialogState] = useState({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
   const itemRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
 
   useEffect(() => {
@@ -112,20 +119,34 @@ const InventoryPage = () => {
   };
 
   const handleNew = () => {
-    if (window.confirm('現在の入力内容は破棄されます。新しい入力を開始しますか？')) {
-      // ローカルストレージをクリア
-      localStorage.removeItem('inventory-in-progress');
-      localStorage.removeItem('inventory-staff-name');
-      // このページの全Stateをリセット
-      setInventoryItems([]);
-      setSelectedCategory('');
-    }
+    setDialogState({
+      open: true,
+      title: '新規作成の確認',
+      message: '現在の入力内容は破棄されます。\n新しい入力を開始しますか？',
+      onConfirm: () => {
+        localStorage.removeItem('inventory-in-progress');
+        setInventoryItems([]);
+        setSelectedCategory('');
+        handleCloseDialog();
+      }
+    });
   };
 
   const handleGoHome = () => {
-    if (window.confirm('作業を中断してホームに戻りますか？\n（現在の内容は保存され、後で再開できます）')) {
-      navigate('/');
-    }
+    setDialogState({
+      open: true,
+      title: 'ホームに戻る',
+      message: '作業を中断してホームに戻りますか？\n（現在の内容は保存され、後で再開できます）',
+      onConfirm: () => {
+        navigate('/');
+        handleCloseDialog();
+      }
+    });
+  };
+
+
+  const handleCloseDialog = () => {
+    setDialogState({ ...dialogState, open: false });
   };
 
   return (
@@ -193,6 +214,14 @@ const InventoryPage = () => {
         totalQuantity={totalQuantity}
         onComplete={handleComplete}
         disabled={totalQuantity === 0 || !staffName}
+      />
+
+      <ConfirmationDialog
+        open={dialogState.open}
+        onClose={handleCloseDialog}
+        onConfirm={dialogState.onConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
       />
     </Box>
   );

@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { Alert, Box, Button, Container, Stack, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
+import ConfirmationDialog from '../components/ConfirmationDialog';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [staffName, setStaffName] = useState('');
   const [error, setError] = useState(false);
   const [hasResumeData, setHasResumeData] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     const savedName = localStorage.getItem('inventory-staff-name');
@@ -30,7 +32,6 @@ const HomePage = () => {
 
 
   const handleNewEntry = () => {
-    // 担当者名が空の場合はエラーを表示して処理を中断
     if (!staffName.trim()) {
       setError(true);
       alert('担当者名を入力してください。');
@@ -39,15 +40,18 @@ const HomePage = () => {
     setError(false);
 
     if (hasResumeData) {
-      if (!window.confirm('中断中のデータがあります。削除して新規作成しますか？')) {
-        return;
-      }
+      // 確認モーダルを開く
+      setOpenDialog(true);
+    } else {
+      // 中断データがなければ、そのまま新規作成
+      createNewSession();
     }
-    // 担当者名をローカルストレージに保存
-    localStorage.setItem('inventory-staff-name', staffName.trim());
-    // 古い作業中データがあればクリアする
-    localStorage.removeItem('inventory-in-progress');
+  };
 
+  // OKが押されたときの処理を定義
+  const createNewSession = () => {
+    localStorage.setItem('inventory-staff-name', staffName.trim());
+    localStorage.removeItem('inventory-in-progress');
     navigate('/new');
   };
 
@@ -121,6 +125,16 @@ const HomePage = () => {
           商品マスタ管理
         </Button>
       </Stack>
+      <ConfirmationDialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        onConfirm={() => {
+          setOpenDialog(false);
+          createNewSession();
+        }}
+        title="確認"
+        message={"中断中のデータがあります。\n削除して新規作成しますか？"}
+      />
     </Container>
   );
 };
