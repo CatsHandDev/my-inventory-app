@@ -66,6 +66,14 @@ const HomePage = () => {
         >
           履歴を見る
         </Button>
+        <Button
+          variant="outlined"
+          color="info"
+          size="large"
+          onClick={() => navigate('/products')}
+        >
+          商品マスタ管理
+        </Button>
       </Stack>
     </Container>
   );

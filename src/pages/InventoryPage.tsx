@@ -4,26 +4,21 @@ import type { Product, InventoryItem, LotInput } from '../types/inventory';
 import LotInputRow from '../components/LotInputRow';
 import InventoryHeader from '../components/InventoryHeader';
 import InventoryFooter from '../components/InventoryFooter';
-// ★★★ 1. 新しいモーダルコンポーネントと、必要なUI部品をインポート ★★★
+// 1. 新しいモーダルコンポーネントと、必要なUI部品をインポート
 import ProductSelectionModal from '../components/ProductSelectionModal';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Box, Container, Divider, List, ListItemText, Paper, type SelectChangeEvent, IconButton, Typography,
 } from '@mui/material';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 // (サンプルデータ定義は変更ありません)
-const allProducts: Product[] = [
-  { id: 1, name: '商品A', jan_suffix: '1234', category: '食品' },
-  { id: 2, name: '商品B', jan_suffix: '5678', category: '食品' },
-  { id: 3, name: '商品C', jan_suffix: '9012', category: '飲料' },
-  { id: 4, name: '商品D', jan_suffix: '3456', category: '雑貨' },
-];
-const categories = [...new Set(allProducts.map((p) => p.category))];
 
 const InventoryPage = () => {
   const navigate = useNavigate();
-  // ★★★ 2. モーダルの開閉を管理するstateを追加 ★★★
+  const [allProducts] = useLocalStorage<Product[]>('product-master', []);
+  const categories = useMemo(() => [...new Set(allProducts.map(p => p.category))], [allProducts]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // (他のState定義は変更ありません)
@@ -42,13 +37,13 @@ const InventoryPage = () => {
 
   const filteredProducts = useMemo(() => allProducts.filter((p) => p.category === selectedCategory), [selectedCategory]);
 
-  // ★★★ 3. 分類選択時にモーダルを開くように処理を変更 ★★★
+  // 3. 分類選択時にモーダルを開くように処理を変更
   const handleCategoryChange = (e: SelectChangeEvent<string>) => {
     setSelectedCategory(e.target.value as string);
     setIsModalOpen(true); // モーダルを開く
   };
   
-  // ★★★ 4. モーダルから商品が選択されたときの処理を新しく定義 ★★★
+  // 4. モーダルから商品が選択されたときの処理を新しく定義
   const handleProductSelect = (product: Product) => {
     const itemExists = inventoryItems.some((item) => item.productId === product.id);
     if (!itemExists) {
@@ -75,7 +70,7 @@ const InventoryPage = () => {
     setSelectedCategory('');
   };
 
-  // ★★★ 5. 商品を削除する処理を新しく定義 ★★★
+  // 5. 商品を削除する処理を新しく定義
   const handleDeleteItem = (productIdToDelete: number) => {
     if (window.confirm('この商品をリストから削除してもよろしいですか？')) {
       setInventoryItems(prevItems => prevItems.filter(item => item.productId !== productIdToDelete));
@@ -149,7 +144,6 @@ const InventoryPage = () => {
             <List sx={{ p: 0 }}>
               {inventoryItems.map((item) => (
                 <Paper key={item.productId} ref={(node) => { const map = itemRefs.current; if (node) { map.set(item.productId, node); } else { map.delete(item.productId); } }} sx={{ mb: 2, p: 2 }}>
-                  {/* ★★★ 7. 削除ボタンを追加 ★★★ */}
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <ListItemText 
                       primary={`${item.productName} (${item.janSuffix})`} 
@@ -183,7 +177,5 @@ const InventoryPage = () => {
     </Box>
   );
 };
-
-// updateInventoryItem以下の関数の完全な実装 (変更なし)
 
 export default InventoryPage;

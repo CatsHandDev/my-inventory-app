@@ -5,6 +5,7 @@ import HistoryPage from './pages/HistoryPage';
 import SummaryPage from './pages/SummaryPage';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import ProductMasterPage from './pages/ProductMasterPage';
 
 import './App.css';
 
@@ -20,6 +21,7 @@ function App() {
           <Route path="/new" element={<InventoryPage />} />
           <Route path="/summary" element={<SummaryPage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/products" element={<ProductMasterPage />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
