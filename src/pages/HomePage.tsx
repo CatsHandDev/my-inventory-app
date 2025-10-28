@@ -1,17 +1,30 @@
 import { useNavigate } from 'react-router-dom';
-import { Button, Container, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Container, Stack, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [staffName, setStaffName] = useState('');
   const [error, setError] = useState(false);
+  const [hasResumeData, setHasResumeData] = useState(false);
 
-  // ページ読み込み時に、前回使用した担当者名を読み込む
   useEffect(() => {
     const savedName = localStorage.getItem('inventory-staff-name');
     if (savedName) {
       setStaffName(savedName);
+    }
+
+    const inProgressData = localStorage.getItem('inventory-in-progress');
+    if (inProgressData) {
+      try {
+        const parsedData = JSON.parse(inProgressData);
+        // データが配列であり、中身が1つ以上あれば「再開可能」と判断
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          setHasResumeData(true);
+        }
+      } catch (e) {
+        console.error('中断データの読み込みに失敗しました', e);
+      }
     }
   }, []);
 
@@ -25,11 +38,27 @@ const HomePage = () => {
     }
     setError(false);
 
+    if (hasResumeData) {
+      if (!window.confirm('中断中のデータがあります。削除して新規作成しますか？')) {
+        return;
+      }
+    }
     // 担当者名をローカルストレージに保存
     localStorage.setItem('inventory-staff-name', staffName.trim());
     // 古い作業中データがあればクリアする
     localStorage.removeItem('inventory-in-progress');
-    
+
+    navigate('/new');
+  };
+
+  const handleResume = () => {
+    if (!staffName.trim()) {
+      setError(true);
+      alert('担当者名を入力してください。');
+      return;
+    }
+    // 担当者名を更新して再開
+    localStorage.setItem('inventory-staff-name', staffName.trim());
     navigate('/new');
   };
 
@@ -52,10 +81,27 @@ const HomePage = () => {
           error={error}
           helperText={error ? '担当者名は必須です' : ''}
         />
+        {hasResumeData && (
+          <Box>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              中断中のデータが保存されています
+            </Alert>
+            <Button
+              variant="contained"
+              color="secondary" // 目立つように色を変える
+              size="large"
+              fullWidth
+              onClick={handleResume}
+            >
+              続きから再開する
+            </Button>
+          </Box>
+        )}
         <Button
-          variant="contained"
+          variant={hasResumeData ? "outlined" : "contained"}
           size="large"
-          onClick={handleNewEntry} // 変更
+          fullWidth
+          onClick={handleNewEntry}
         >
           新規入力
         </Button>

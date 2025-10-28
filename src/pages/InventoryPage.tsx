@@ -29,20 +29,19 @@ const InventoryPage = () => {
   });
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const itemRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
-  
-  // (useEffectは変更ありません)
+
   useEffect(() => {
     localStorage.setItem('inventory-in-progress', JSON.stringify(inventoryItems));
   }, [inventoryItems]);
 
-  const filteredProducts = useMemo(() => allProducts.filter((p) => p.category === selectedCategory), [selectedCategory]);
+  const filteredProducts = useMemo(() => allProducts.filter((p) => p.category === selectedCategory), [selectedCategory, allProducts]);
 
   // 3. 分類選択時にモーダルを開くように処理を変更
   const handleCategoryChange = (e: SelectChangeEvent<string>) => {
     setSelectedCategory(e.target.value as string);
     setIsModalOpen(true); // モーダルを開く
   };
-  
+
   // 4. モーダルから商品が選択されたときの処理を新しく定義
   const handleProductSelect = (product: Product) => {
     const itemExists = inventoryItems.some((item) => item.productId === product.id);
@@ -110,7 +109,7 @@ const InventoryPage = () => {
   };
 
   const handleGoHome = () => {
-    if (window.confirm('ホームに戻りますか？\n（入力中の内容は保存されますが、トップページで「新規入力」を押すとリセットされます）')) {
+    if (window.confirm('作業を中断してホームに戻りますか？\n（現在の内容は保存され、後で再開できます）')) {
       navigate('/');
     }
   };
@@ -125,7 +124,7 @@ const InventoryPage = () => {
         onCategoryChange={handleCategoryChange}
         categories={categories}
       />
-      
+
       {/* モーダルコンポーネント */}
       <ProductSelectionModal
         open={isModalOpen}
@@ -136,7 +135,7 @@ const InventoryPage = () => {
         products={filteredProducts}
         onProductSelect={handleProductSelect}
       />
-      
+
       {/* --- スクロールエリア --- */}
       <Box sx={{ flexGrow: 1, overflowY: 'auto', width: '100%', bgcolor: 'grey.50' }}>
         <Container maxWidth="md" sx={{ maxWidth: 768, py: 2 }}>
@@ -145,8 +144,8 @@ const InventoryPage = () => {
               {inventoryItems.map((item) => (
                 <Paper key={item.productId} ref={(node) => { const map = itemRefs.current; if (node) { map.set(item.productId, node); } else { map.delete(item.productId); } }} sx={{ mb: 2, p: 2 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <ListItemText 
-                      primary={`${item.productName} (${item.janSuffix})`} 
+                    <ListItemText
+                      primary={`${item.productName} (${item.janSuffix})`}
                       secondary={`小計: ${item.subtotal} 個`}
                     />
                     <IconButton onClick={() => handleDeleteItem(item.productId)} size="small" edge="end">
