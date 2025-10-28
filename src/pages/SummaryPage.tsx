@@ -11,7 +11,6 @@ import {
   Box,
   List,
   ListItem,
-  ListItemText,
   Divider,
   Stack,
 } from '@mui/material';
@@ -68,8 +67,15 @@ const SummaryPage = () => {
           <List>
             {items.map((item) => (
               <React.Fragment key={item.productId}>
-                <ListItem>
-                  <ListItemText primary={`${item.productName} (${item.janSuffix})`} secondary={`合計: ${item.subtotal} 個`}/>
+                <ListItem sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {/* 左側の要素 */}
+                  <Typography variant="body1">
+                    {`${item.productName} (${item.janSuffix})`}
+                  </Typography>
+                  {/* 右側の要素 */}
+                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                    {item.subtotal} 個
+                  </Typography>
                 </ListItem>
                 <Box sx={{ pl: 4, pb: 1 }}>
                   {item.lots.map((lot) => (

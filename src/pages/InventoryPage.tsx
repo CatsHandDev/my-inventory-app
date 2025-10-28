@@ -158,13 +158,17 @@ const InventoryPage = () => {
               {inventoryItems.map((item) => (
                 <Paper key={item.productId} ref={(node) => { const map = itemRefs.current; if (node) { map.set(item.productId, node); } else { map.delete(item.productId); } }} sx={{ mb: 2, p: 2 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <ListItemText
-                      primary={`${item.productName} (${item.janSuffix})`}
-                      secondary={`小計: ${item.subtotal} 個`}
-                    />
-                    <IconButton onClick={() => handleDeleteItem(item.productId)} size="small" edge="end">
-                      <DeleteIcon />
-                    </IconButton>
+                    <Typography variant='h6' component='div' sx={{ fontWeight: 'bold' }}>
+                      {`${item.productName} (${item.janSuffix})`}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography component="div" sx={{ fontWeight: 'bold' }}>
+                        {item.subtotal} 個
+                      </Typography>
+                      <IconButton onClick={() => handleDeleteItem(item.productId)} size="small" edge="end">
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
                   </Box>
                   <Divider sx={{ my: 1 }}/>
                   <Box sx={{ pl: { xs: 0, sm: 2 } }}>

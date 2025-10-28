@@ -58,15 +58,18 @@ const LotInputRow = ({ lots, onChange }: Props) => {
             />
             <IconButton onClick={() => handleUpdate(lot.id, 'lotCount', lot.lotCount + 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <AddCircleOutlineIcon fontSize="small"/> </IconButton>
 
+            <div style={{ flex: 1 }} />
+
+            {/* 各行の小計 */}
+            <Typography variant="body2" align="right" sx={{ color: 'text.secondary', pr: 1 }}>
+              小計: {lot.lotCount * lot.quantityPerLot} 個
+            </Typography>
+
             {/* 削除ボタン */}
             <IconButton onClick={() => handleRemoveLot(lot.id)} size="small" disabled={lots.length <= 1} sx={{ ml: 'auto' }}>
               <DeleteIcon fontSize="small"/>
             </IconButton>
           </Box>
-          {/* 各行の小計 */}
-          <Typography variant="body2" align="right" sx={{ color: 'text.secondary', pr: 1 }}>
-            小計: {lot.lotCount * lot.quantityPerLot} 個
-          </Typography>
         </Stack>
       ))}
       <Button startIcon={<AddCircleOutlineIcon />} onClick={handleAddLot} sx={{mt: 1}}>
