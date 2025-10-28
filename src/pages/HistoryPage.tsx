@@ -71,7 +71,7 @@ const HistoryPage = () => {
 
 
   return (
-    <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh', py: 4 }}>
+    <Box sx={{ bgcolor: 'grey.50', width: '100%', minHeight: '100vh', py: 4 }}>
       <Container maxWidth="md" sx={{ maxWidth: 768 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h5" component="h1">

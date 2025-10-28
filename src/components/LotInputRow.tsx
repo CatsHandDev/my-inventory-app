@@ -36,39 +36,44 @@ const LotInputRow = ({ lots, onChange }: Props) => {
   return (
     <Stack spacing={2}>
       {lots.map((lot) => (
-        <Stack key={lot.id} spacing={1}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            {/* 入数 */}
-            <Typography variant="body2" sx={{minWidth: '40px', ml: 1}}>入数:</Typography>
-            <IconButton onClick={() => handleUpdate(lot.id, 'quantityPerLot', lot.quantityPerLot - 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <RemoveCircleOutlineIcon fontSize="small"/> </IconButton>
-            <TextField
-              type="number" size="small" value={lot.quantityPerLot}
-              onChange={(e) => handleUpdate(lot.id, 'quantityPerLot', parseInt(e.target.value, 10))}
-              sx={{ width: '80px' }} inputProps={{ style: { textAlign: 'center' } }}
-            />
-            <IconButton onClick={() => handleUpdate(lot.id, 'quantityPerLot', lot.quantityPerLot + 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <AddCircleOutlineIcon fontSize="small"/> </IconButton>
+        <Stack key={lot.id} sx={{ width: '100%' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: 1, flexWrap: 'wrap' }}>
+            <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {/* 入数 */}
+                <Typography variant="h5" sx={{ minWidth: '10px', mr: 1 }}>入数:</Typography>
+                <TextField
+                  type="number" size="small" value={lot.quantityPerLot}
+                  onChange={(e) => handleUpdate(lot.id, 'quantityPerLot', parseInt(e.target.value, 10))}
+                  sx={{ width: '70px' }} inputProps={{ style: { textAlign: 'center' } }}
+                />
+                <IconButton onClick={() => handleUpdate(lot.id, 'quantityPerLot', lot.quantityPerLot - 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <RemoveCircleOutlineIcon fontSize="small"/> </IconButton>
+                <IconButton onClick={() => handleUpdate(lot.id, 'quantityPerLot', lot.quantityPerLot + 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <AddCircleOutlineIcon fontSize="small"/> </IconButton>
+              </div>
+              {/* 各行の小計 */}
+              <Typography variant="body2" align="right" sx={{ color: 'text.secondary' }}>
+                小計: {lot.lotCount * lot.quantityPerLot} 個
+              </Typography>
 
-            {/* ロット数 */}
-            <Typography variant="body2" sx={{minWidth: '60px'}}>ロット数:</Typography>
-            <IconButton onClick={() => handleUpdate(lot.id, 'lotCount', lot.lotCount - 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <RemoveCircleOutlineIcon fontSize="small"/> </IconButton>
-            <TextField
-              type="number" size="small" value={lot.lotCount}
-              onChange={(e) => handleUpdate(lot.id, 'lotCount', parseInt(e.target.value, 10))}
-              sx={{ width: '80px' }} inputProps={{ style: { textAlign: 'center' } }}
-            />
-            <IconButton onClick={() => handleUpdate(lot.id, 'lotCount', lot.lotCount + 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <AddCircleOutlineIcon fontSize="small"/> </IconButton>
+            </div>
 
-            <div style={{ flex: 1 }} />
-
-            {/* 各行の小計 */}
-            <Typography variant="body2" align="right" sx={{ color: 'text.secondary', pr: 1 }}>
-              小計: {lot.lotCount * lot.quantityPerLot} 個
-            </Typography>
-
-            {/* 削除ボタン */}
-            <IconButton onClick={() => handleRemoveLot(lot.id)} size="small" disabled={lots.length <= 1} sx={{ ml: 'auto' }}>
-              <DeleteIcon fontSize="small"/>
-            </IconButton>
+            <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+              {/* ロット数 */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Typography variant="h5" sx={{ minWidth: '40px', mr: 1 }}>個数:</Typography>
+                <TextField
+                  type="number" size="small" value={lot.lotCount}
+                  onChange={(e) => handleUpdate(lot.id, 'lotCount', parseInt(e.target.value, 10))}
+                  sx={{ width: '70px' }} inputProps={{ style: { textAlign: 'center' } }}
+                />
+                <IconButton onClick={() => handleUpdate(lot.id, 'lotCount', lot.lotCount - 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <RemoveCircleOutlineIcon fontSize="small"/> </IconButton>
+                <IconButton onClick={() => handleUpdate(lot.id, 'lotCount', lot.lotCount + 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <AddCircleOutlineIcon fontSize="small"/> </IconButton>
+              </div>
+              {/* 削除ボタン */}
+              <IconButton onClick={() => handleRemoveLot(lot.id)} size="small" disabled={lots.length <= 1} sx={{ ml: 'auto' }}>
+                <DeleteIcon fontSize="small"/>
+              </IconButton>
+            </div>
           </Box>
         </Stack>
       ))}

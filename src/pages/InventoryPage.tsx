@@ -3,18 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import type { Product, InventoryItem, LotInput } from '../types/inventory';
 import InventoryHeader from '../components/InventoryHeader';
 import InventoryFooter from '../components/InventoryFooter';
-// 1. 新しいモーダルコンポーネントと、必要なUI部品をインポート
 import ProductSelectionModal from '../components/ProductSelectionModal';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
-  Box, Container, Divider, List, Paper, type SelectChangeEvent, IconButton, Typography,
+  Box, Container, Divider, List, Paper, IconButton, Typography,
 } from '@mui/material';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import LotInputRow from '../components/LotInputRow';
 import ConfirmationDialog from '../components/ConfirmationDialog';
-
-// (サンプルデータ定義は変更ありません)
 
 const InventoryPage = () => {
   const navigate = useNavigate();
@@ -25,7 +22,6 @@ const InventoryPage = () => {
   const [staffName] = useState(() => localStorage.getItem('inventory-staff-name') || '');
 
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>(() => {
-    // データ移行処理 (古い形式のデータを安全に読み込む)
     const savedData = localStorage.getItem('inventory-in-progress');
     if (savedData) {
       try {
@@ -59,13 +55,7 @@ const InventoryPage = () => {
 
   const filteredProducts = useMemo(() => allProducts.filter((p) => p.category === selectedCategory), [selectedCategory, allProducts]);
 
-  // 3. 分類選択時にモーダルを開くように処理を変更
-  const handleCategoryChange = (e: SelectChangeEvent<string>) => {
-    setSelectedCategory(e.target.value as string);
-    setIsModalOpen(true); // モーダルを開く
-  };
-
-  // 4. モーダルから商品が選択されたときの処理を新しく定義
+  // モーダルから商品が選択されたときの処理を定義
   const handleProductSelect = (product: Product) => {
     const itemExists = inventoryItems.some((item) => item.productId === product.id);
     if (!itemExists) {
@@ -91,7 +81,7 @@ const InventoryPage = () => {
     setSelectedCategory('');
   };
 
-  // 5. 商品を削除する処理を新しく定義
+  // 商品を削除する処理を新しく定義
   const handleDeleteItem = (productIdToDelete: number) => {
     if (window.confirm('この商品をリストから削除してもよろしいですか？')) {
       setInventoryItems(prevItems => prevItems.filter(item => item.productId !== productIdToDelete));
@@ -144,9 +134,13 @@ const InventoryPage = () => {
     });
   };
 
-
   const handleCloseDialog = () => {
     setDialogState({ ...dialogState, open: false });
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    setIsModalOpen(true);
   };
 
   return (
@@ -156,7 +150,7 @@ const InventoryPage = () => {
         onGoHome={handleGoHome}
         onNew={handleNew}
         selectedCategory={selectedCategory}
-        onCategoryChange={handleCategoryChange}
+        onCategorySelect={handleCategorySelect}
         categories={categories}
       />
 
