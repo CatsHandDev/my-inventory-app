@@ -1,7 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Product, InventoryItem, LotInput } from '../types/inventory';
-import LotInputRow from '../components/LotInputRow';
 import InventoryHeader from '../components/InventoryHeader';
 import InventoryFooter from '../components/InventoryFooter';
 // 1. 新しいモーダルコンポーネントと、必要なUI部品をインポート
@@ -12,6 +11,7 @@ import {
 } from '@mui/material';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import LotInputRow from '../components/LotInputRow';
 
 // (サンプルデータ定義は変更ありません)
 
@@ -21,12 +21,28 @@ const InventoryPage = () => {
   const categories = useMemo(() => [...new Set(allProducts.map(p => p.category))], [allProducts]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // (他のState定義は変更ありません)
   const [staffName] = useState(() => localStorage.getItem('inventory-staff-name') || '');
+
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>(() => {
+    // データ移行処理 (古い形式のデータを安全に読み込む)
     const savedData = localStorage.getItem('inventory-in-progress');
-    return savedData ? JSON.parse(savedData) : [];
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        if (Array.isArray(parsedData)) {
+          return parsedData.map((item): InventoryItem => ({
+            productId: item.productId || 0,
+            productName: item.productName || '',
+            janSuffix: item.janSuffix || '',
+            lots: Array.isArray(item.lots) ? item.lots : [{ id: Date.now(), lotCount: 1, quantityPerLot: 1 }],
+            subtotal: item.subtotal || 1,
+          }));
+        }
+      } catch (e) { console.error("Failed to parse inventory data", e); }
+    }
+    return [];
   });
+
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const itemRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
 
@@ -46,12 +62,11 @@ const InventoryPage = () => {
   const handleProductSelect = (product: Product) => {
     const itemExists = inventoryItems.some((item) => item.productId === product.id);
     if (!itemExists) {
-      // 新規追加
       const newItem: InventoryItem = {
         productId: product.id,
         productName: product.name,
         janSuffix: product.jan_suffix,
-        lots: [{ id: Date.now(), lot: '1', quantity: 1 }],
+        lots: [{ id: Date.now(), lotCount: 1, quantityPerLot: 1 }],
         subtotal: 1,
       };
       setInventoryItems([...inventoryItems, newItem]);
@@ -77,7 +92,7 @@ const InventoryPage = () => {
   };
 
   const updateInventoryItem = (productId: number, updatedLots: LotInput[]) => {
-    const newSubtotal = updatedLots.reduce((sum, lot) => sum + (lot.quantity || 0), 0);
+    const newSubtotal = updatedLots.reduce((sum, lot) => sum + (lot.lotCount * lot.quantityPerLot), 0);
     setInventoryItems(
       inventoryItems.map((item) =>
         item.productId === productId
@@ -87,10 +102,9 @@ const InventoryPage = () => {
     );
   };
 
-  const totalQuantity = useMemo(
-    () => inventoryItems.reduce((sum, item) => sum + item.subtotal, 0),
-    [inventoryItems]
-  );
+  const totalQuantity = useMemo(() => {
+    return inventoryItems.reduce((sum, item) => sum + item.subtotal, 0);
+  }, [inventoryItems]);
 
   const handleComplete = () => {
     const validItems = inventoryItems.filter(item => item.subtotal > 0);
@@ -154,7 +168,10 @@ const InventoryPage = () => {
                   </Box>
                   <Divider sx={{ my: 1 }}/>
                   <Box sx={{ pl: { xs: 0, sm: 2 } }}>
-                    <LotInputRow lots={item.lots} onChange={(updatedLots) => updateInventoryItem(item.productId, updatedLots)}/>
+                    <LotInputRow
+                      lots={item.lots}
+                      onChange={(updatedLots) => updateInventoryItem(item.productId, updatedLots)}
+                    />
                   </Box>
                 </Paper>
               ))}

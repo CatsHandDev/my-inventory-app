@@ -16,27 +16,24 @@ const createProductSummaryExportData = (items: InventoryItem[], staffName: strin
   }));
 };
 
-// ★★★ ここから下を全て追加 ★★★
-
 // --- 履歴データからのエクスポート用ヘルパー関数 ---
 const createHistoryExportData = (record: HistoryRecord) => {
   const recordDate = new Date(record.date);
   const date = `${(recordDate.getMonth() + 1).toString().padStart(2, '0')}/${recordDate.getDate().toString().padStart(2, '0')}`;
 
-  // 履歴のitemにはsubtotalがないので、lotsから計算する
   return record.items.map(item => {
-    const subtotal = item.lots.reduce((sum, lot) => sum + (lot.quantity || 0), 0);
+    const subtotal = item.lots.reduce((sum, lot) => sum + (lot.lotCount * lot.quantityPerLot), 0);
     return {
       '商品名': item.productName,
       'JANコード': item.janSuffix,
       '日付': date,
       '合計個数': subtotal,
-      '担当者': record.staffName || '', // 過去のデータに担当者名がなければ空文字
+      '担当者': record.staffName || '',
     };
   });
 };
 
-// --- 既存のエクスポート関数 (変更なし) ---
+// --- 既存のエクスポート関数 ---
 export const exportToXLSX = (items: InventoryItem[], staffName: string) => {
   const data = createProductSummaryExportData(items, staffName);
   const worksheet = XLSX.utils.json_to_sheet(data);

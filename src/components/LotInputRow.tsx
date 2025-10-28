@@ -1,5 +1,5 @@
 import type { LotInput } from '../types/inventory';
-import { TextField, Button, IconButton, Box, Stack } from '@mui/material';
+import { TextField, IconButton, Box, Stack, Button, Typography } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -10,41 +10,20 @@ interface Props {
 }
 
 const LotInputRow = ({ lots, onChange }: Props) => {
-  const handleLotChange = (id: number, value: string) => {
-    const newLots = lots.map((lot) =>
-      lot.id === id ? { ...lot, lot: value } : lot
-    );
-    onChange(newLots);
-  };
 
-  // 2. ロット入力欄からフォーカスが外れた時の処理を追加
-  const handleLotBlur = (id: number, value: string) => {
-    // もし入力欄が空だったら、値を '1' に設定する
-    if (value.trim() === '') {
-      handleLotChange(id, '1');
-    }
-  };
-
-  const handleQuantityChange = (id: number, value: string) => {
-    const quantity = parseInt(value, 10);
-    const newLots = lots.map((lot) =>
-      lot.id === id ? { ...lot, quantity: isNaN(quantity) || quantity < 0 ? 0 : quantity } : lot
-    );
-    onChange(newLots);
-  };
-
-  const handleQuantityStep = (id: number, step: number) => {
-    const newLots = lots.map((lot) =>
-      lot.id === id
-        ? { ...lot, quantity: Math.max(0, lot.quantity + step) }
-        : lot
-    );
+  const handleUpdate = (id: number, field: 'lotCount' | 'quantityPerLot', value: number) => {
+    const validValue = Math.max(1, isNaN(value) ? 1 : value);
+    const newLots = lots.map(lot => {
+      if (lot.id === id) {
+        return { ...lot, [field]: validValue };
+      }
+      return lot;
+    });
     onChange(newLots);
   };
 
   const handleAddLot = () => {
-    // 2. 追加されるロットの初期値を '1' に設定
-    const newLot: LotInput = { id: Date.now(), lot: '1', quantity: 1 };
+    const newLot: LotInput = { id: Date.now(), lotCount: 1, quantityPerLot: 1 };
     onChange([...lots, newLot]);
   };
 
@@ -55,71 +34,43 @@ const LotInputRow = ({ lots, onChange }: Props) => {
   };
 
   return (
-    <Stack style={{ marginTop: 20 }} spacing={2}>
+    <Stack spacing={2}>
       {lots.map((lot) => (
-        <Box 
-          key={lot.id} 
-          sx={{ 
-            display: 'grid', // FlexboxからGridレイアウトに変更
-            // 画面幅に応じて列の構成を定義
-            gridTemplateColumns: '1fr 1fr auto auto auto', 
-            gap: 1, 
-            alignItems: 'center' 
-          }}
-        >
-          <TextField
-            label="ロット"
-            type="number"
-            variant="outlined"
-            size="small"
-            value={lot.lot}
-            onChange={(e) => handleLotChange(lot.id, e.target.value)}
-            onBlur={(e) => handleLotBlur(lot.id, e.target.value)} // onBlurイベントハンドラを追加
-            // 3. ロット入力欄の幅を固定
-          />
-          <TextField
-            label="個数"
-            type="number"
-            variant="outlined"
-            size="small"
-            value={lot.quantity}
-            onChange={(e) => handleQuantityChange(lot.id, e.target.value)}
-            // 3. 個数入力欄の幅を固定
-          />
-          <IconButton 
-            onClick={() => handleQuantityStep(lot.id, -1)} 
-            size="small"
-            sx={{
-              bgcolor: 'grey.200', // 薄いグレーの背景
-              borderRadius: 1,
-              '&:hover': {
-                bgcolor: 'grey.300' // ホバー時にもう少し濃いグレーに
-              }
-            }}
-          >
-            <RemoveCircleOutlineIcon />
-          </IconButton>
+        <Stack key={lot.id} spacing={1}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            {/* 入数 */}
+            <Typography variant="body2" sx={{minWidth: '40px', ml: 1}}>入数:</Typography>
+            <IconButton onClick={() => handleUpdate(lot.id, 'quantityPerLot', lot.quantityPerLot - 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <RemoveCircleOutlineIcon fontSize="small"/> </IconButton>
+            <TextField
+              type="number" size="small" value={lot.quantityPerLot}
+              onChange={(e) => handleUpdate(lot.id, 'quantityPerLot', parseInt(e.target.value, 10))}
+              sx={{ width: '80px' }} inputProps={{ style: { textAlign: 'center' } }}
+            />
+            <IconButton onClick={() => handleUpdate(lot.id, 'quantityPerLot', lot.quantityPerLot + 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <AddCircleOutlineIcon fontSize="small"/> </IconButton>
 
-          <IconButton 
-            onClick={() => handleQuantityStep(lot.id, 1)} 
-            size="small"
-            sx={{
-              bgcolor: 'grey.200', // 薄いグレーの背景
-              borderRadius: 1,
-              '&:hover': {
-                bgcolor: 'grey.300' // ホバー時にもう少し濃いグレーに
-              }
-            }}
-          >
-            <AddCircleOutlineIcon />
-          </IconButton>
-          <IconButton onClick={() => handleRemoveLot(lot.id)} size="small" disabled={lots.length <= 1}>
-            <DeleteIcon />
-          </IconButton>
-        </Box>
+            {/* ロット数 */}
+            <Typography variant="body2" sx={{minWidth: '60px'}}>ロット数:</Typography>
+            <IconButton onClick={() => handleUpdate(lot.id, 'lotCount', lot.lotCount - 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <RemoveCircleOutlineIcon fontSize="small"/> </IconButton>
+            <TextField
+              type="number" size="small" value={lot.lotCount}
+              onChange={(e) => handleUpdate(lot.id, 'lotCount', parseInt(e.target.value, 10))}
+              sx={{ width: '80px' }} inputProps={{ style: { textAlign: 'center' } }}
+            />
+            <IconButton onClick={() => handleUpdate(lot.id, 'lotCount', lot.lotCount + 1)} size="small" sx={{ bgcolor: 'grey.200' }}> <AddCircleOutlineIcon fontSize="small"/> </IconButton>
+
+            {/* 削除ボタン */}
+            <IconButton onClick={() => handleRemoveLot(lot.id)} size="small" disabled={lots.length <= 1} sx={{ ml: 'auto' }}>
+              <DeleteIcon fontSize="small"/>
+            </IconButton>
+          </Box>
+          {/* 各行の小計 */}
+          <Typography variant="body2" align="right" sx={{ color: 'text.secondary', pr: 1 }}>
+            小計: {lot.lotCount * lot.quantityPerLot} 個
+          </Typography>
+        </Stack>
       ))}
-      <Button style={{ paddingBottom: 0 }} startIcon={<AddCircleOutlineIcon />} onClick={handleAddLot}>
-        ロットを追加
+      <Button startIcon={<AddCircleOutlineIcon />} onClick={handleAddLot} sx={{mt: 1}}>
+        別のロット(入数)を追加
       </Button>
     </Stack>
   );

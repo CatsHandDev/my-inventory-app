@@ -1,32 +1,30 @@
-// 商品マスタの型
 export interface Product {
   id: number;
   name: string;
-  jan_suffix: string; // JANコード下4桁
+  jan_suffix: string;
   category: string;
 }
 
-// 入力されるロット情報の型
+// 1つのロット行が持つデータ
 export interface LotInput {
-  id: number;
-  lot: string;
-  quantity: number;
+  id: number; // 各行をユニークに識別するためのID
+  lotCount: number; // その行のロット数
+  quantityPerLot: number; // その行の入数
 }
 
-// 在庫入力中の商品の型
+// 1つの商品が持つデータ
 export interface InventoryItem {
   productId: number;
   productName: string;
   janSuffix: string;
-  lots: LotInput[];
-  subtotal: number;
+  lots: LotInput[]; // 複数のロット情報を配列で持つ
+  subtotal: number; // 全ロット行の小計を合算した、商品ごとの合計
 }
 
-// 履歴として保存するデータの型
 export interface HistoryRecord {
   id: string;
   date: string;
   items: Omit<InventoryItem, 'subtotal'>[];
   totalQuantity: number;
-  staffName: string; // ★★★ 担当者名を追加 ★★★
+  staffName: string;
 }

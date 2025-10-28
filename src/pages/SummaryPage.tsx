@@ -27,7 +27,6 @@ const SummaryPage = () => {
   const [history, setHistory] = useLocalStorage<HistoryRecord[]>('inventory-history', []);
 
   const handleSave = () => {
-    // (この関数の中身は変更ありません)
     const newRecord: HistoryRecord = {
       id: new Date().toISOString(),
       date: new Date().toISOString(),
@@ -40,17 +39,13 @@ const SummaryPage = () => {
     };
     setHistory([newRecord, ...history]);
     localStorage.removeItem('inventory-in-progress');
-    localStorage.removeItem('inventory-staff-name');
     alert('保存しました。');
     navigate('/');
   };
 
   const handleNew = () => {
     if (window.confirm('現在の入力内容は破棄されます。新しい入力を開始しますか？')) {
-      // ローカルストレージをクリア
       localStorage.removeItem('inventory-in-progress');
-      localStorage.removeItem('inventory-staff-name');
-      // 在庫入力ページに移動
       navigate('/new');
     }
   };
@@ -62,23 +57,13 @@ const SummaryPage = () => {
   };
 
   return (
-    // ★★★ 1. 全幅レイアウトのための構造に変更 ★★★
-    <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh', py: 4, display: 'flex', alignItems: 'start', flexGrow: 1 }}>
+    <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh', py: 4 }}>
       <Container maxWidth="md" sx={{ maxWidth: 768 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10}}>
-          <div style={{ display: 'flex', alignItems: 'center', margin: 0 }}>
-            <Typography variant="h5" component="h1" gutterBottom sx={{ margin: 0 }}>
-              入力内容の確認
-            </Typography>
-          </div>
-          <Button variant="outlined" color="secondary" size="medium" onClick={handleNew}>
-              新規作成
-          </Button>
-        </div>
+        <Typography variant="h5" component="h1" gutterBottom>
+          入力内容の確認
+        </Typography>
         <Paper elevation={2} sx={{ p: 2 }}>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            <strong>担当者:</strong> {staffName || '未入力'}
-          </Typography>
+          <Typography variant="body1" sx={{ mb: 2 }}><strong>担当者:</strong> {staffName || '未入力'}</Typography>
           <Divider sx={{ mb: 1 }} />
           <List>
             {items.map((item) => (
@@ -89,7 +74,7 @@ const SummaryPage = () => {
                 <Box sx={{ pl: 4, pb: 1 }}>
                   {item.lots.map((lot) => (
                     <Typography key={lot.id} variant="body2" color="text.secondary">
-                      ロット: {lot.lot || '1'}, 個数: {lot.quantity}
+                      入数: {lot.quantityPerLot} × ロット数: {lot.lotCount} 個 = {lot.lotCount * lot.quantityPerLot}
                     </Typography>
                   ))}
                 </Box>
@@ -97,24 +82,22 @@ const SummaryPage = () => {
               </React.Fragment>
             ))}
           </List>
-          <Typography variant="h6" align="right" sx={{ mt: 2 }}>
-            総合計: {total} 個
-          </Typography>
+          <Typography variant="h6" align="right" sx={{ mt: 2 }}>総合計: {total} 個</Typography>
         </Paper>
 
         <Box sx={{ mt: 4 }}>
           <Button variant="contained" size="large" fullWidth onClick={handleSave}>
             この内容で保存する
           </Button>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent:'space-between', gap: 20 }}>
-            <Button variant="outlined" color="primary" size="large" fullWidth onClick={handleGoHome} sx={{ mt: 2 }}>
-              ホームに戻る
-            </Button>
-            <Button variant="outlined" size="large" fullWidth onClick={() => navigate(-1)} sx={{ mt: 2 }}>
-              入力に戻る
-            </Button>
-          </div>
+          <Button variant="outlined" size="large" fullWidth onClick={() => navigate(-1)} sx={{ mt: 2 }}>
+            入力に戻る
+          </Button>
+          <Button variant="outlined" color="secondary" size="large" fullWidth onClick={handleNew} sx={{ mt: 2 }}>
+            新規作成
+          </Button>
+           <Button variant="outlined" color="primary" size="large" fullWidth onClick={handleGoHome} sx={{ mt: 2 }}>
+            ホームに戻る
+          </Button>
         </Box>
 
         <Box sx={{ mt: 4 }}>
