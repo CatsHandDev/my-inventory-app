@@ -36,6 +36,7 @@ const SummaryPage = () => {
         return { productId, productName, janSuffix, lots };
       }),
       totalQuantity: total,
+      staffName: staffName,
     };
     setHistory([newRecord, ...history]);
     localStorage.removeItem('inventory-in-progress');
@@ -44,13 +45,36 @@ const SummaryPage = () => {
     navigate('/');
   };
 
+  const handleNew = () => {
+    if (window.confirm('現在の入力内容は破棄されます。新しい入力を開始しますか？')) {
+      // ローカルストレージをクリア
+      localStorage.removeItem('inventory-in-progress');
+      localStorage.removeItem('inventory-staff-name');
+      // 在庫入力ページに移動
+      navigate('/new');
+    }
+  };
+
+  const handleGoHome = () => {
+    if (window.confirm('ホームに戻りますか？\n（入力ページに戻れば作業を再開できます）')) {
+      navigate('/');
+    }
+  };
+
   return (
     // ★★★ 1. 全幅レイアウトのための構造に変更 ★★★
-    <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh', py: 4 }}>
+    <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh', py: 4, display: 'flex', alignItems: 'start', flexGrow: 1 }}>
       <Container maxWidth="md" sx={{ maxWidth: 768 }}>
-        <Typography variant="h5" component="h1" gutterBottom>
-          入力内容の確認
-        </Typography>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10}}>
+          <div style={{ display: 'flex', alignItems: 'center', margin: 0 }}>
+            <Typography variant="h5" component="h1" gutterBottom sx={{ margin: 0 }}>
+              入力内容の確認
+            </Typography>
+          </div>
+          <Button variant="outlined" color="secondary" size="medium" onClick={handleNew}>
+              新規作成
+          </Button>
+        </div>
         <Paper elevation={2} sx={{ p: 2 }}>
           <Typography variant="body1" sx={{ mb: 2 }}>
             <strong>担当者:</strong> {staffName || '未入力'}
@@ -82,9 +106,15 @@ const SummaryPage = () => {
           <Button variant="contained" size="large" fullWidth onClick={handleSave}>
             この内容で保存する
           </Button>
-          <Button variant="outlined" size="large" fullWidth onClick={() => navigate(-1)} sx={{ mt: 2 }}>
-            入力に戻る
-          </Button>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent:'space-between', gap: 20 }}>
+            <Button variant="outlined" color="primary" size="large" fullWidth onClick={handleGoHome} sx={{ mt: 2 }}>
+              ホームに戻る
+            </Button>
+            <Button variant="outlined" size="large" fullWidth onClick={() => navigate(-1)} sx={{ mt: 2 }}>
+              入力に戻る
+            </Button>
+          </div>
         </Box>
 
         <Box sx={{ mt: 4 }}>

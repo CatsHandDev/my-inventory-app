@@ -30,6 +30,11 @@ body {
   min-height: 100vh;
 }
 
+#root {
+  display: flex;
+  flex-grow: 1
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
