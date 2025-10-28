@@ -2,25 +2,34 @@ import React, { useState, useMemo, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Product } from '../types/inventory';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import Papa from 'papaparse';
+import Papa, { type ParseResult } from 'papaparse'; // ★★★ 3. ParseResultをインポート
 import {
   Box, Button, Container, Paper, Stack, TextField, Typography, List, ListItem, ListItemText, IconButton, Divider, Autocomplete
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+// ★★★ 3. インポートするデータの行の型を定義 ★★★
+interface CsvRow {
+  category?: string;
+  name?: string;
+  jan_code?: string;
+}
+
 const ProductMasterPage = () => {
   const navigate = useNavigate();
+  // ★★★ 1. 未使用の分割代入を修正 ★★★
   const [products, setProducts] = useLocalStorage<Product[]>('product-master', []);
-  const [] = useState<string | null>(null);
+
   const [inputValue, setInputValue] = useState('');
-  const [value, setValue] = useState<string>(''); 
+  const [value, setValue] = useState<string>('');
+
   const [newProductName, setNewProductName] = useState('');
   const [newJanCode, setNewJanCode] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   const existingCategories = useMemo(() => [...new Set(products.map(p => p.category))], [products]);
 
-   const handleAddProduct = () => {
+  const handleAddProduct = () => {
     if (!value.trim() || !newProductName.trim() || !newJanCode.trim()) {
       alert('すべての項目を入力してください。');
       return;
@@ -33,7 +42,7 @@ const ProductMasterPage = () => {
       jan_suffix: janSuffix,
     };
     setProducts([...products, newProduct]);
-    
+
     setValue('');
     setInputValue('');
     setNewProductName('');
@@ -52,10 +61,15 @@ const ProductMasterPage = () => {
       p.jan_suffix.includes(searchTerm)
     );
   }, [products, searchTerm]);
-  
-  // CSVエクスポート処理
+
   const handleExportCSV = () => {
-    const csv = Papa.unparse(products.map(({id, ...rest}) => rest));
+    // ★★★ 2. 未使用変数を発生させない書き方に修正 ★★★
+    const exportData = products.map(p => ({
+      category: p.category,
+      name: p.name,
+      jan_code: p.jan_suffix // ヘッダーをjan_codeに合わせる
+    }));
+    const csv = Papa.unparse(exportData);
     const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -63,20 +77,20 @@ const ProductMasterPage = () => {
     link.click();
   };
 
-  // CSVインポート処理
   const handleImportCSV = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
+      // ★★★ 3. any型を回避 ★★★
       Papa.parse(event.target.files[0], {
         header: true,
         skipEmptyLines: true,
-        complete: (results) => {
-          const importedProducts: Product[] = results.data.map((row: any) => ({
+        complete: (results: ParseResult<CsvRow>) => {
+          const importedProducts: Product[] = results.data.map((row) => ({
             id: Date.now() + Math.random(),
             category: row.category || '',
             name: row.name || '',
             jan_suffix: String(row.jan_code || '').slice(-4),
           }));
-          setProducts([...products, ...importedProducts]);
+          setProducts(prevProducts => [...prevProducts, ...importedProducts]);
           alert(`${importedProducts.length}件の商品をインポートしました。`);
         }
       });
@@ -92,19 +106,17 @@ const ProductMasterPage = () => {
           <Button variant="outlined" onClick={() => navigate('/')}>トップに戻る</Button>
         </Box>
 
-        {/* 新規登録エリア */}
         <Paper sx={{ p: 2, mb: 4 }}>
           <Stack spacing={2}>
             <Typography variant="h6">新規商品登録</Typography>
             <Autocomplete
               value={value}
-              onChange={(_event: any, newValue: string | null) => {
+              onChange={(_event, newValue: string | null) => {
                 setValue(newValue || '');
               }}
               inputValue={inputValue}
               onInputChange={(_event, newInputValue) => {
                 setInputValue(newInputValue);
-                // ユーザーが自由入力したテキストも `value` にセットする
                 setValue(newInputValue);
               }}
               freeSolo
@@ -117,7 +129,6 @@ const ProductMasterPage = () => {
           </Stack>
         </Paper>
 
-        {/* 一覧エリア */}
         <Paper sx={{ p: 2 }}>
           <Typography variant="h6">登録済み商品一覧</Typography>
           <TextField
@@ -143,8 +154,7 @@ const ProductMasterPage = () => {
             ))}
           </List>
         </Paper>
-        
-        {/* CSV操作エリア */}
+
         <Paper sx={{ p: 2, mt: 4 }}>
           <Typography variant="h6">CSV一括操作</Typography>
           <Stack direction="row" spacing={2} mt={2}>

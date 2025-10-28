@@ -52,7 +52,7 @@ const HistoryPage = () => {
                           <Box sx={{ pl: 2, width: '100%' }}>
                             {item.lots.map(lot => (
                               <Typography key={lot.id} variant="body2" color="textSecondary">
-                                ロット: {lot.lot || '1'}, 個数: {lot.quantity}
+                                ロット数: {lot.lotCount}, 入数: {lot.quantityPerLot} = {lot.lotCount * lot.quantityPerLot} 個
                               </Typography>
                             ))}
                           </Box>
