@@ -57,7 +57,16 @@ const LotInputRow = ({ lots, onChange }: Props) => {
   return (
     <Stack style={{ marginTop: 20 }} spacing={2}>
       {lots.map((lot) => (
-        <Box key={lot.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box 
+          key={lot.id} 
+          sx={{ 
+            display: 'grid', // FlexboxからGridレイアウトに変更
+            // 画面幅に応じて列の構成を定義
+            gridTemplateColumns: '1fr 1fr auto auto auto', 
+            gap: 1, 
+            alignItems: 'center' 
+          }}
+        >
           <TextField
             label="ロット"
             type="number"
@@ -67,7 +76,6 @@ const LotInputRow = ({ lots, onChange }: Props) => {
             onChange={(e) => handleLotChange(lot.id, e.target.value)}
             onBlur={(e) => handleLotBlur(lot.id, e.target.value)} // onBlurイベントハンドラを追加
             // 3. ロット入力欄の幅を固定
-            sx={{ width: '90px' }}
           />
           <TextField
             label="個数"
@@ -77,7 +85,6 @@ const LotInputRow = ({ lots, onChange }: Props) => {
             value={lot.quantity}
             onChange={(e) => handleQuantityChange(lot.id, e.target.value)}
             // 3. 個数入力欄の幅を固定
-            sx={{ width: '120px' }}
           />
           <IconButton 
             onClick={() => handleQuantityStep(lot.id, -1)} 
